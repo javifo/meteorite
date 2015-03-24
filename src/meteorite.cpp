@@ -284,7 +284,8 @@ sintElement::sintElement( ID_Element id) : ID_Element( id ){ type = sInteger;  d
 void sintElement::print(bool endline){ cout << name << ": " << data << (endline ? "\n" : "" ); }
 unsigned sintElement::Size( void ){
 	return IDSize() + EBMLsize(uIntegertoEBML(ByteCount( data ))) + ByteCount( data );
-// TODO (death#1#): Check if 3 byte sints?	}
+// TODO (death#1#): Check if 3 byte sints?
+	}
 void sintElement::write( ofstream &outfile ){
 	outfile.write( reinterpret_cast<char*>(&make_bigendian(ID) ), IDSize() );
 	outfile.write( EBMLtoWritebuff( uIntegertoEBML( ByteCount( data ) )), EBMLsize(uIntegertoEBML( ByteCount( data ) )) );
@@ -1228,7 +1229,8 @@ inline bool Meteorite::IsKeyFrame( char *data, unsigned size, char *four_cc ){ /
 			while( pos+4 < size ){
 				data_nextnalu = data+pos;
 				avcflag |= (1 << ((data_nextnalu[4] & 0x0F)-1));
-// TODO (death#1#): bigendian				nalu_len = make_bigendian( *reinterpret_cast< uint32_t*>( data_nextnalu ));
+// TODO (death#1#): bigendian
+				nalu_len = make_bigendian( *reinterpret_cast< uint32_t*>( data_nextnalu ));
 				pos += nalu_len+4;
 				}
 			return ((avcflag>>(5-1)) & 0x01);
@@ -1793,16 +1795,17 @@ uint32_t Meteorite::GetDefaultFrameDuration( subElement* root, unsigned TrackNum
 						uintElement* DefaultDuration_ptr = dynamic_cast< uintElement* >( Get( TrackEntry_ptr, IDof( "DefaultDuration" ) ) );
 						if( DefaultDuration_ptr not_eq NULL )
 							return DefaultDuration_ptr->data;
-						}
+						else{
+                					cerr << "Error : No Default Duration detected!" << endl;
+                					exit(1);
+                				}
 					}
 				}
 			}
 		}
-	else{
-		cerr << "Error : No Default Duration detected!" << endl;
-		exit(1);
-		}
 	}
+}
+
 int Meteorite::GetTrackCount( subElement* root){
 	vector<ID_Element*> a;
 	TreeSearchID( root, IDof("TrackNumber"), a );
@@ -2484,3 +2487,27 @@ void Meteorite::Adjust_Void_Sections( subElement *Segment_ptr, uint64_t SegmentS
 	outfile.seekp( SegmentStart );
 	TreeParserWrite( Segment_ptr, outfile );
 	}
+
+int main(int argc, char *argv[]) {
+	Meteorite inst;
+ 	string input, output;
+
+	if (argc > 1)
+		input = (string)argv[1];
+
+	if (argc >= 2)
+		output = (string)argv[2];
+
+    cout << "There are " << argc << " arguments:" << endl;
+
+	cout << "input =\"" << input << "\", output =\"" << output << "\"" << endl;
+
+	if (!input.empty() && !output.empty())
+		inst.Repair(input, output);
+
+    // Loop through each argument and print its number and value
+    for (int nArg=0; nArg < argc; nArg++)
+        cout << nArg << " " << argv[nArg] << endl;
+ 
+    return 0;
+}

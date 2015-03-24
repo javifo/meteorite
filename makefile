@@ -7,14 +7,11 @@ RC = `$(WXCONFIG) --rescomp`
 RCFLAGS = `$(WXCONFIG) --cxxflags`
 MSGFMT = msgfmt
 
-SOURCES= src/MeteoriteApp.cpp\
-			src/MeteoriteGUI.cpp\
-			src/MeteoriteMain.cpp\
-			src/meteorite.cpp
+SOURCES= src/meteorite.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 DEPENDS=$(OBJECTS:.o=.d)
-RESOURCES= resources/resource.rc
-RESOURCE_OBJ=$(RESOURCES:.rc=.o)
+#RESOURCES= resources/resource.rc
+#RESOURCE_OBJ=$(RESOURCES:.rc=.o)
 EXECUTABLE=meteorite
 EXECUTABLE_WIN=Meteorite.exe
 
